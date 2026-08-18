@@ -1,0 +1,23 @@
+{
+  "name": "ai-gateway-2-of-10-provider-registry",
+  "version": "0.2.0",
+  "description": "AI Gateway - Provider Abstraction + Model Registry (Day 2)",
+  "type": "module",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "node --watch api/index.js",
+    "test": "bash tests/run-tests.sh"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14",
+    "pg": "^8.13.1",
+    "redis": "^4.7.0",
+    "prom-client": "^15.1.3",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

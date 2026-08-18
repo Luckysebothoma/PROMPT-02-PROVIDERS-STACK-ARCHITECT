@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'ai-gateway-api'
+    static_configs:
+      - targets: ['ai-gateway-2-of-10-api:8080']
