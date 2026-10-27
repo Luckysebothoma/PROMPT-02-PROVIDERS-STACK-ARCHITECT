@@ -30,31 +30,12 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - ai-gateway-net
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: ai-gateway-postgres-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-ai_gateway}
-      POSTGRES_USER: ${POSTGRES_USER:-ai_gateway}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
-    volumes:
-      - ai-gateway-pgdata:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ai_gateway} -d ${POSTGRES_DB:-ai_gateway}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    networks:
-      - ai-gateway-net
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
 
   redis:
     image: redis:7-alpine
@@ -66,39 +47,16 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 100
     networks:
       - ai-gateway-net
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: ai-gateway-prometheus
-    restart: unless-stopped
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "4404:9090"
-    networks:
-      - ai-gateway-net
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: ai-gateway-grafana
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ai-gateway-grafanadata:/var/lib/grafana
-    ports:
-      - "4403:3000"
-    networks:
-      - ai-gateway-net
+      - databases
 
 networks:
   ai-gateway-net:
-    driver: bridge
+    external: true
+  databases:
+    external: true
 
 volumes:
   ai-gateway-pgdata:
